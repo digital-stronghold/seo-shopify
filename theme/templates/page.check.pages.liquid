@@ -1,0 +1,51 @@
+{%- layout none -%}
+{%- paginate collections by 1000 -%}
+<head>
+  <style media="screen">
+    span{ color: #f2f2f2;}
+    a{ color: #C2C2C2;}
+    a:hover{ color: #363636;}
+  </style>
+</head>
+<body>
+  {%- assign pagesInvisible = '' -%}
+  {%- assign pagesVisible = '' -%}
+  {%- assign adminURL = 'https://taylor-stitch.myshopify.com/admin/pages/' -%}
+  {%- for page in pages -%}
+    {%- if page.metafields.seo.hidden == 1 -%}
+      {%- capture pagesInvisible -%}{%- unless pagesInvisible == '' -%}{{ pagesInvisible }}{%- endunless -%}
+        <li>
+          <b>{{ page.title }}</b>
+          <span>[ <a href="{{ page.url }}">public</a> | <a href="{{ adminURL }}{{ page.id }}">admin</a> ]</span>
+        </li>
+      {%- endcapture -%}
+    {%- else -%}
+      {%- capture pagesVisible -%}{%- unless pagesVisible == '' -%}{{ pagesVisible }}{%- endunless -%}
+        <li>
+          <b>{{ page.title }}</b>
+          <span>[ <a href="{{ page.url }}">public</a> | <a href="{{ adminURL }}{{ page.id }}">admin</a> ]</span>
+        </li>
+      {%- endcapture -%}
+    {%- endif -%}
+  {%- endfor -%}
+  <h1>{{ page.title }}</h1>
+  {%- if pagesVisible != '' -%}
+    <h2>Published Pages, visible</h2>
+    <p>Review and see if any are stale and can be unpublished (consider also creating a redirect) or are "components" anad can have `seo.hidden` metafield added, with value `1`.</p>
+    <ol>{{ pagesVisible }}</ol>
+  {%- endif -%}
+  {%- if pagesInvisible != '' -%}
+    <h2>Component Pages, hidden from sitemap</h2>
+    <p>Review and see if any should be made visible or unpublished altogether.</p>
+    <ol>{{ pagesInvisible }}</ol>
+  {%- endif -%}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinysort/3.2.5/tinysort.min.js"></script>
+  <script type="text/javascript">
+    $("ol").each(function(index){
+      let items = $(this).children("li");
+      tinysort(items);
+    });
+  </script>
+</body>
+{%- endpaginate -%}

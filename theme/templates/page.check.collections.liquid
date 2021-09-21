@@ -1,0 +1,71 @@
+{%- layout none -%}
+{%- paginate collections by 1000 -%}
+<head>
+  <style media="screen">
+    span{ color: #f2f2f2;}
+    span a, span span{ color: #C2C2C2;}
+    a:hover{ color: #363636; text-decoration: none;}
+  </style>
+</head>
+<body>
+  {%- assign adminURL = 'https://taylor-stitch.myshopify.com/admin/collections/' -%}
+  {%- assign products0 = '' -%}
+  {%- assign products1 = '' -%}
+  {%- assign invisible = '' -%}
+  {%- for collection in collections -%}
+    {%- if collection.metafields.seo.hidden == 1 -%}
+      {%- capture invisible -%}{%- unless invisible == '' -%}{{ invisible }}{%- endunless -%}
+        <li>
+          <b>{{ collection.title }}</b>
+          <span>[ <a href="{{ collection.url }}">public</a> | <a href="{{ adminURL }}{{ collection.id }}">admin</a> | <span>{{ collection.all_products_count }} Products</span> ]</span>
+        </li>
+      {%- endcapture -%}
+    {%- elsif collection.all_products_count == 0 -%}
+      {%- capture products0 -%}{%- unless products0 == '' -%}{{ products0 }}{%- endunless -%}
+        <li>
+          <b>{{ collection.title }}</b>
+          <span>[ <a href="{{ collection.url }}">public</a> | <a href="{{ adminURL }}{{ collection.id }}">admin</a> ]</span>
+        </li>
+      {%- endcapture -%}
+    {%- elsif collection.all_products_count == 1 -%}
+      {%- capture products1 -%}{%- unless products1 == '' -%}{{ products1 }}{%- endunless -%}
+        <li>
+          <b>{{ collection.title }}</b>
+          <span>[ <a href="{{ collection.url }}">public</a> | <a href="{{ adminURL }}{{ collection.id }}">admin</a> ]</span>
+        </li>
+      {%- endcapture -%}
+    {%- endif -%}
+  {%- endfor -%}
+  <h1>{{ page.title }}</h1>
+  <p>See <a href="https://github.com/digital-stronghold/seo-shopify">Shopify SEO Code helpers</a> for reference.</p>
+  <h2>Collections w/ Zero Products</h2>
+  {%- if products0 == '' -%}
+    <p>No matching Collections:)</p>
+  {%- else -%}
+    <p>These should either be unpublished (consider also creating a redirect) or have `seo.hidden` metafield added, with value `1`.</p>
+    <ol>{{ products0 }}</ol>
+  {%- endif -%}
+  <h2>Collections w/ 1 Product</h2>
+  {%- if products1 == '' -%}
+    <p>No matching Collections:)</p>
+  {%- else -%}
+    <p>Consider unpublishing (and redirecting).</p>
+    <ol>{{ products1 }}</ol>
+  {%- endif -%}
+  <h2>&ldquo;Invisible&rdquo; Collections</h2>
+  {%- if invisible == '' -%}
+    <p>No matching Collections:)</p>
+  {%- else -%}
+    <p>Consider making visible.</p>
+    <ol>{{ invisible }}</ol>
+  {%- endif -%}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinysort/3.2.5/tinysort.min.js"></script>
+  <script type="text/javascript">
+    $("ol").each(function(index){
+      let items = $(this).children("li");
+      tinysort(items);
+    });
+  </script>
+</body>
+{%- endpaginate -%}

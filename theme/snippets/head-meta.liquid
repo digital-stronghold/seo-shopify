@@ -1,0 +1,54 @@
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="canonical" href="{{ canonical_url }}">
+<link rel="sitemap" type="application/xml" title="Sitemap" href="{{ shop.url }}/sitemap.xml">
+<link rel="alternate" type="application/atom+xml" title="Atom" href="{{ shop.url }}/blogs/news.atom">
+<link rel="alternate" type="application/atom+xml" title="Atom" href="{{ shop.url }}/collections/all.atom">
+{%- assign seoTitle = page_title -%}
+{%- if current_tags -%}
+  {%- assign currentTag = current_tags[0] | capitalize -%}
+  {%- if template contains 'collection' -%}
+    {%- assign seoTitle = seoTitle | prepend: ' | ' | prepend: currentTag -%}
+  {%- else -%}{%- comment -%}Blog{%- endcomment -%}
+    {%- assign seoTitle = seoTitle | append: ' | Tagged: ' | append: currentTag -%}
+  {%- endif -%}
+{%- endif -%}
+{%- if current_page > 1 -%}
+  {%- assign seoTitle = seoTitle | append: ' | Page ' | append: current_page -%}
+{%- endif -%}
+{%- if template contains 'product' and collection -%}
+  {%- assign seoTitle = seoTitle | append: ' | ' | append: collection.title -%}
+{%- elsif template == 'article' -%}
+  {%- assign seoTitle = seoTitle | append: ' | ' | append: blog.title -%}
+{%- endif -%}
+<title>{{ seoTitle }}</title>
+{%- assign metaDescription = false -%}
+{%- if page_description and page_description != blank -%}
+  {%- assign metaDescription = page_description -%}
+{%- elsif template contains 'blog' or template contains 'article' -%}
+  {%- if blog.metafields.global.description_tag -%}
+    {%- assign metaDescription = blog.metafields.global.description_tag -%}
+  {%- endif -%}
+{%- elsif template contains 'collection' -%}
+  {%- if shop.description -%}
+    {%- assign metaDescription = shop.description -%}
+  {%- endif -%}
+{%- endif -%}
+{%- if template contains 'blog' and current_tags -%}
+  {%- capture currentTagsDescriptor -%}
+    Articles from the blog, tagged: {{ current_tags[0] }}.
+  {%- endcapture -%}
+  {%- assign metaDescription = metaDescription | append: ' ' | append: currentTagsDescriptor -%}
+{%- endif -%}
+{%- if metaDescription != false -%}
+  {%- assign metaDescription = metaDescription | strip_html | escape -%}
+  {%- if metaDescription.size < 70 -%}
+    {%- assign metaDescription = metaDescription | append: shop.description -%}
+  {%- endif -%}
+  <meta name="description" content="{{ metaDescription }}">
+{%- endif -%}
+{%- render 'head-meta-social' -%}
+{%- comment -%}
+  {%- render 'head-favicons' -%}
+{%- endcomment -%}
