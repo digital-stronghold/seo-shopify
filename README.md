@@ -14,8 +14,8 @@ This template can be used to help identify empty Collections, which should eithe
 
 ### [[SEO] Pages Checker](https://github.com/digital-stronghold/seo-shopify/blob/master/theme/templates/page.check.pages.liquid)
 
-This template can be used to review published pages that are visible to sitemaps and published pages that are hidden via Admin API, in case action is needed on either. [See here]()
+This template can be used to review published pages that are visible to sitemaps and published pages that are hidden via Admin API*, in case action is needed on either. [See here]()
 
-(*) See [Manage SEO data with the Admin API](https://shopify.dev/api/examples/marketing-seo) for reference. **TL;DR** Add `'seo.hidden'` metafield added, with value `'1'`
+(*) See [Manage SEO data with the Admin API](https://shopify.dev/api/examples/marketing-seo) for reference. **TL;DR** Add `seo.hidden` metafield, with value `1`.
 
 Also see [Editing robots.txt.liquid ](https://help.shopify.com/en/manual/promoting-marketing/seo/editing-robots-txt)
