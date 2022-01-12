@@ -1,4 +1,10 @@
-{%- if template == 'blog' or template == 'blog.dispatches' -%}
+{%- comment -%}
+  NOTES/TODO:
+    * Update Social Linkes ~ search below for "sameAs"
+    * Might need to update URL in "ContactPoint"
+    * Edit/remove "department" (or add more)
+{%- endcomment -%}
+{%- if template contains 'blog' -%}
   <script type="application/ld+json">
     {
       "@context": "http://schema.org/",
@@ -25,7 +31,7 @@
       }
     }
   </script>
-{%- elsif template == 'article' or template == 'article.dispatches' -%}
+{%- elsif template contains 'article' -%}
   <script type="application/ld+json">
     {
       "@context": "http://schema.org",
@@ -54,7 +60,7 @@
         "@type": "WebPage",
         "@id": "{{ shop.url }}/blogs/{{ blog.handle }}/{{ article.handle }}"
       }
-   }
+    }
   </script>
 {%- elsif template contains 'product' -%}
   {%- comment -%}
@@ -70,7 +76,7 @@
       "productID": "{{ product.variants[0].id }}",
       "sku": "{{ product.variants[0].sku }}",
       "name": "{{ product.title | escape }}",
-      "description": "{% if page_description %}{{ page_description | escape }}{% else %}{{ product.metafields.copycat.selling_point | strip_html | truncate: 157 }}{% endif %}",
+      "description": "{{ page_description | escape }}",
       "image": "https:{{ product.featured_image.src | img_url: 'master' | remove: 'http' | remove: 'https:' }}",
       "brand": "{{ shop.name }}",
       "offers": {
@@ -78,7 +84,7 @@
         "priceCurrency": "USD",
         "price": "{{ product.price | money_without_currency }}",
         "itemCondition":"https://schema.org/NewCondition",
-        "availability": "http://schema.org/{% if workshopProductData.active %}PreOrder{% elsif product.available %}InStock{% else %}OutOfStock{% endif %}",
+        "availability": "http://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}",
         "url": "{{ shop.url | append: '/products/' | append: product.handle }}",
         "seller": {
           "@type": "Organization",
@@ -99,10 +105,9 @@
       "@type": "WebSite",
       "url": "{{ shop.url }}",
       "sameAs": [
-        "https://instagram.com/taylorstitch",
-        "https://www.facebook.com/taylorstitchclothing",
-        "https://twitter.com/taylorstitch",
-        "https://www.pinterest.com/taylorstitch/"
+        "https://www.twitter.com/xyz",
+        "https://www.facebook.com/xyz",
+        "https://instagram.com/xyz"
       ],
       "potentialAction": {
         "@type": "SearchAction",
@@ -117,59 +122,29 @@
         "contactPoint": {
           "@type": "ContactPoint",
           "contactType": "Customer Service",
-          "url": "{{ shop.url }}/help",
-          "email": "hello@taylorstitch.com"
+          "url": "{{ shop.url }}/pages/contact",
+          "email": "{{ shop.email }}"
         },
         "address": {
           "@type": "PostalAddress",
-          "addressLocality": "San Francisco",
-          "addressRegion": "CA",
-          "postalCode": "94103",
-          "streetAddress": "290 Utah Street"
+          "streetAddress": "{{ shop.address.street }}",
+          "addressLocality": "{{ shop.address.city }}",
+          "addressRegion": "{{ shop.address.province_code }}",
+          "postalCode": "{{ shop.address.zip }}"
         },
         "department": [
           {
             "@type": "ClothingStore",
-            "name": "Valencia",
-            "image": "https:{{ 'taylorstitch_aboutpage_export_valencia_01.jpg' | file_img_url: 'master' | remove: 'http' | remove: 'https:' }}",
+            "name": "Our Physical Retail Store",
+            "image": "",
             "address": {
               "@type": "PostalAddress",
-              "addressCountry": "USA",
-              "addressLocality": "San Francisco",
-              "addressRegion": "CA",
-              "postalCode": " 94103",
-              "streetAddress": "383 Valencia Street"
+              "streetAddress": ""
+              "addressLocality": "",
+              "addressRegion": "",
+              "postalCode": ""
             },
-            "telephone": "+1 (415) 621-2231",
-            "priceRange": "$$$"
-          },
-          {
-            "@type": "ClothingStore",
-            "name": "Chestnut",
-            "image": "https:{{ 'taylorstitch_aboutpage_export_chestnut_01.jpg' | file_img_url: 'master' | remove: 'http' | remove: 'https:' }}",
-            "address": {
-              "@type": "PostalAddress",
-              "addressCountry": "USA",
-              "addressLocality": "San Francisco",
-              "addressRegion": "CA",
-              "postalCode": "94115",
-              "streetAddress": "2030 Chestnut Street"
-            },
-            "telephone": "+1 (415) 757-0547",
-            "priceRange": "$$$"
-          },
-          {
-            "@type": "ClothingStore",
-            "name": "Kamakura",
-            "image": "https:{{ 'taylorstitch_aboutpage_export_kamakura_01.jpg' | file_img_url: 'master' | remove: 'http' | remove: 'https:' }}",
-            "address": {
-              "@type": "PostalAddress",
-              "addressCountry": "Japan",
-              "addressLocality": "Shichirigahama",
-              "addressRegion": "Kamakura",
-              "streetAddress": "1 Chome-1-1"
-            },
-            "telephone": "+81 (0120) 776-560",
+            "telephone": "",
             "priceRange": "$$$"
           }
         ]
