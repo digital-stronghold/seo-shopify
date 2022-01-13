@@ -1,3 +1,7 @@
+{%- comment -%}
+  [SEO] Empty Collections Checker
+  https://github.com/digital-stronghold/seo-shopify
+{%- endcomment -%}
 {%- layout none -%}
 {%- paginate collections by 1000 -%}
 <head>
@@ -8,7 +12,7 @@
   </style>
 </head>
 <body>
-  {%- assign adminURL = 'https://taylor-stitch.myshopify.com/admin/collections/' -%}
+  {%- capture adminURL -%}https://{{ shop.permanent_domain }}/admin/collections/{%- endcapture -%}
   {%- assign products0 = '' -%}
   {%- assign products1 = '' -%}
   {%- assign invisible = '' -%}
