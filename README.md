@@ -6,6 +6,10 @@
 * [`head-meta-social.liquid`](https://github.com/digital-stronghold/seo-shopify/blob/master/theme/snippets/head-meta-social.liquid)
 * [`structured-data.liquid`](https://github.com/digital-stronghold/seo-shopify/blob/master/theme/snippets/structured-data.liquid)
 
+## HTML/Liquid Snippets
+
+* [`seo-img-alt-brand-prepender.liquid`](https://github.com/digital-stronghold/seo-shopify/blob/master/theme/snippets/seo-img-alt-brand-prepender.liquid)
+
 ## Alternate Page Templates for Checking
 
 ### [[SEO] Empty Collections Checker](https://github.com/digital-stronghold/seo-shopify/blob/master/theme/templates/page.check.collections.liquid)

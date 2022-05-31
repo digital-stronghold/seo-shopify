@@ -1,0 +1,9 @@
+{%- comment -%}
+  NOTES: Usage
+  alt="{% render 'seo-img-alt-brand-prepender' with product.featured_image.alt %}"
+{%- endcomment -%}
+{%- assign imgAlt = seo-img-alt-brand-prepender -%}
+{%- unless imgAlt contains shop.name -%}
+  {%- assign imgAlt = imgAlt | prepend: ' ' | prepend: shop.name -%}
+{%- endunless -%}
+{{- imgAlt | escape -}}
