@@ -9,6 +9,30 @@
     {{- rule -}}
   {% endfor %}
 
+  {%- comment -%}
+    NOTE: What this code says is; if the user_agent (Robots name) is equal to *,
+          which applies to all robots, then disallow the following:
+
+          1.  /apps            – This will block apps that use a proxy url(*)
+          2.  /blogs/*/tagged  – This will block blog tags being crawled
+          3.  /collections/*/* – This will block product tags being crawled(**)
+          4.  /*?q=            – This will block the default vendors and types collection pages being crawled
+
+          Beware:
+          (*)  This is the default but exact proxy URLs can be customized
+          (**) Be careful with this, it may prevent products being crawled, if you don’t customise internal links
+                i.e. remove `within: collection` liquid filter from PLPs etc.
+
+  {%- endcomment -%}
+
+  {%- if group.user_agent.value == '*' -%}
+    {{- 'Disallow: /apps*' }}
+    {{- 'Disallow: /collections/all*' }}
+    {{- 'Disallow: /*?q=*' }}
+    {{- 'Disallow: /collections/*/*' }}
+    {{- 'Disallow: /blogs/*/tagged/*' }}
+  {%- endif -%}
+
   {%- if group.sitemap != blank -%}
     {{ group.sitemap }}
   {%- endif -%}
