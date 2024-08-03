@@ -22,7 +22,7 @@
 {%- elsif template == 'article' -%}
   {%- assign seoTitle = seoTitle | append: ' | ' | append: blog.title -%}
 {%- endif -%}
-<title>{{ seoTitle }}</title>
+<title>{{ seoTitle }}{% unless seoTitle contains shop.name %} | {{ shop.name }}{% endunless %}</title>
 {%- assign metaDescription = false -%}
 {%- if page_description and page_description != blank -%}
   {%- assign metaDescription = page_description -%}
