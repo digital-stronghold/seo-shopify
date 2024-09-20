@@ -63,34 +63,62 @@
     }
   </script>
 {%- elsif template contains 'product' -%}
-  {%- comment -%}
-    This in the schema below is for Facebook Catalogue:
-    "productID": "{{ product.variants[0].id }}"
-  {%- endcomment -%}
   <script type="application/ld+json">
     {
       "@context": "http://schema.org",
-      "@type": "Product",
-      "@id": "{{ shop.url | append: '/products/' | append: product.handle }}",
-      "url": "{{ shop.url | append: '/products/' | append: product.handle }}",
-      "productID": "{{ product.variants[0].id }}",
-      "sku": "{{ product.variants[0].sku }}",
-      "name": "{{ product.title | escape }}",
-      "description": "{{ page_description | escape }}",
-      "image": "https:{{ product.featured_image.src | img_url: 'master' | remove: 'http' | remove: 'https:' }}",
-      "brand": "{{ shop.name }}",
-      "offers": {
-        "@type": "Offer",
-        "priceCurrency": "USD",
-        "price": "{{ product.price | money_without_currency }}",
-        "itemCondition":"https://schema.org/NewCondition",
-        "availability": "http://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}",
-        "url": "{{ shop.url | append: '/products/' | append: product.handle }}",
-        "seller": {
-          "@type": "Organization",
-          "name": "{{ shop.name }}"
-        }
-      }{% if product.metafields.stamped.reviews_count and product.metafields.stamped.reviews_count != '0' %},
+      "@type": "ProductGroup",
+      "productGroupID": "{{ product.id }}",
+      "name": {{ product.title | json }},
+      "url": {{ request.origin | append: product.url | json }},
+      {% if product.selected_or_first_available_variant.sku != blank -%}
+        "sku": {{ product.selected_or_first_available_variant.sku | json }},
+      {%- endif %}
+      "description": {{ page_description | strip_html | json }},
+      {% if seo_media -%}
+        "image": [
+          {{ seo_media | image_url: width: 1920 | prepend: "https:" | json }}
+        ],
+      {%- endif %}
+      "brand": {
+        "@type": "Brand",
+        "name": {{ product.vendor | json }}
+      },
+      "variesBy": [
+        {%- for option in product.options -%}
+        "https:\/\/schema.org\/{{ option | downcase }}"{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ],
+      "hasVariant": [
+        {%- for variant in product.variants -%}
+          {
+            "@type": "Product",
+            "image": [
+              {{ product.featured_image | image_url: width: 1920 | prepend: "https:" | json }}
+            ],
+            "description": {{ product.description | strip_html | json }},
+            {% if variant.sku != blank -%}
+              "sku": {{ variant.sku | json }},
+            {%- endif %}
+            "name": {{ product.title | append: '(' | append: variant.title | append: ')' | json }},
+            {%- for option in product.options -%}
+              {{ option | downcase | json }}: {{ variant.options[forloop.index0] | json }},
+            {%- endfor -%}
+            "offers": {
+              "@type" : "Offer",
+              "url" : {{ request.origin | append: variant.url | json }},
+              "availability" : "http://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}",
+              "price" : {{ variant.price | divided_by: 100.00 | json }},
+              "priceCurrency" : {{ cart.currency.iso_code | json }},
+              "seller": {
+                "@type": "Organization",
+                "name": {{ shop.name | json }}
+              },
+              "shippingDetails": {{ request.origin | append: '/pages/shipping-policy' | json }},
+              "hasMerchantReturnPolicy": {{ request.origin | append: '/pages/return-policy' | json }}
+            }
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ]{% if product.metafields.stamped.reviews_count and product.metafields.stamped.reviews_count != '0' %},
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": "{{ product.metafields.stamped.reviews_average }}",
