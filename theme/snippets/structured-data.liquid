@@ -44,7 +44,7 @@
         "backstory": "{{ blog.metafields.global.description_tag }}",
         "headline": "{{ article.title | escape }}",
         "description": "{{ article.excerpt | strip_html | escape }}",
-        "image": "https:{{ article.img.src | img_url | remove: 'http' | remove: 'https:' }}",
+        "image": "{{ article.img.src | image_url: width: 600  | prepend: 'https:' }}",
         "wordCount": "{{ article.content | strip_html | strip_newlines | downcase | remove: 'and' | remove: 'the' | split: ' ' | size }}",
         "author": {
           "@type": "Person",
@@ -55,7 +55,7 @@
           "name": "{{ shop.name }}",
           "logo": {
             "@type": "ImageObject",
-            "url": "https:{{ 'apple-touch-icon.png' | asset_url | remove: 'http' | remove: 'https:' }}"
+            "url": "{{ 'apple-touch-icon.png' | asset_url  | prepend: 'https:' }}"
           }
         },
         "mainEntityOfPage": {
@@ -147,7 +147,7 @@
         "publisher": {
           "@type": "Organization",
           "name": "{{ shop.name }}",
-          "logo": "https:{{ 'apple-touch-icon.png' | asset_url | remove: 'http' | remove: 'https:' }}",
+          "logo": "{{ 'apple-touch-icon.png' | asset_url | prepend: 'https:' }}",
           "description": "{{ shop.description | escape }}",
           "contactPoint": {
             "@type": "ContactPoint",
