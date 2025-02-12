@@ -5,179 +5,180 @@
     * Edit/remove "department" (or add more)
     * Product "aggregateRating" below has dependency on Stamped. Can be change for e.g. Yotpo
 {%- endcomment -%}
-{%- if template contains 'blog' -%}
-  <script type="application/ld+json">
-    {
-      "@context": "http://schema.org/",
-      "@type": "Blog",
-      "name": "{{ blog.title }}",
-      "headline": "{{ blog.metafields.global.title_tag }}",
-      "description": "{{ blog.metafields.global.description_tag }}",
-      "publisher": {
-        "@type": "Organization",
-        "@id": "{{ shop.url }}",
-        "name": "{{ shop.name }}",
-        "description": "{{ shop.description }}"
-      },
-      "mainEntity": {
-        "@type": "ItemList",
-        "numberOfItems": {{ blog.articles_count }},
-        "itemListElement": [{% for article in blog.articles %}
-          {
-            "@type": "ListItem",
-            "position": {{ forloop.index }},
-            "url": "{{ shop.url }}/blogs/{{ blog.handle }}/{{ article.handle }}"
-          }{% unless forloop.last %},{% endunless %}{% endfor %}
-        ]
-      }
-    }
-  </script>
-{%- elsif template contains 'article' -%}
-  <script type="application/ld+json">
-    {
-      "@context": "http://schema.org",
-      "@type": "BlogPosting",
-      "datePublished": "{{ article.published_at | date }}",
-      "dateModified": "{{ article.updated_at | date }}",
-      "articleSection": "{{ blog.title }}",
-      "backstory": "{{ blog.metafields.global.description_tag }}",
-      "headline": "{{ article.title | escape }}",
-      "description": "{{ article.excerpt | strip_html | escape }}",
-      "image": "https:{{ article.img.src | img_url | remove: 'http' | remove: 'https:' }}",
-      "wordCount": "{{ article.content | strip_html | strip_newlines | downcase | remove: 'and' | remove: 'the' | split: ' ' | size }}",
-      "author": {
-        "@type": "Person",
-        "name": "{{ article.author }}"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "{{ shop.name }}",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https:{{ 'apple-touch-icon.png' | asset_url | remove: 'http' | remove: 'https:' }}"
+{%- case template.name -%}
+  {%- when 'blog' -%}
+    <script type="application/ld+json">
+      {
+        "@context": "http://schema.org/",
+        "@type": "Blog",
+        "name": "{{ blog.title }}",
+        "headline": "{{ blog.metafields.global.title_tag }}",
+        "description": "{{ blog.metafields.global.description_tag }}",
+        "publisher": {
+          "@type": "Organization",
+          "@id": "{{ shop.url }}",
+          "name": "{{ shop.name }}",
+          "description": "{{ shop.description }}"
+        },
+        "mainEntity": {
+          "@type": "ItemList",
+          "numberOfItems": {{ blog.articles_count }},
+          "itemListElement": [{% for article in blog.articles %}
+            {
+              "@type": "ListItem",
+              "position": {{ forloop.index }},
+              "url": "{{ shop.url }}/blogs/{{ blog.handle }}/{{ article.handle }}"
+            }{% unless forloop.last %},{% endunless %}{% endfor %}
+          ]
         }
-      },
-      "mainEntityOfPage": {
-        "@type": "WebPage",
-        "@id": "{{ shop.url }}/blogs/{{ blog.handle }}/{{ article.handle }}"
       }
-    }
-  </script>
-{%- elsif template contains 'product' -%}
-  <script type="application/ld+json">
-    {
-      "@context": "http://schema.org",
-      "@type": "ProductGroup",
-      "productGroupID": "{{ product.id }}",
-      "name": {{ product.title | json }},
-      "url": {{ request.origin | append: product.url | json }},
-      {% if product.selected_or_first_available_variant.sku != blank -%}
-        "sku": {{ product.selected_or_first_available_variant.sku | json }},
-      {%- endif %}
-      "description": {{ page_description | strip_html | json }},
-      {% if seo_media -%}
-        "image": [
-          {{ seo_media | image_url: width: 1920 | prepend: "https:" | json }}
-        ],
-      {%- endif %}
-      "brand": {
-        "@type": "Brand",
-        "name": {{ product.vendor | json }}
-      },
-      "variesBy": [
-        {%- for option in product.options -%}
-        "https:\/\/schema.org\/{{ option | downcase }}"{% unless forloop.last %},{% endunless %}
-        {%- endfor -%}
-      ],
-      "hasVariant": [
-        {%- for variant in product.variants -%}
-          {
-            "@type": "Product",
-            "image": [
-              {{ product.featured_image | image_url: width: 1920 | prepend: "https:" | json }}
-            ],
-            "description": {{ product.description | strip_html | json }},
-            {% if variant.sku != blank -%}
-              "sku": {{ variant.sku | json }},
-            {%- endif %}
-            "name": {{ product.title | append: '(' | append: variant.title | append: ')' | json }},
-            {%- for option in product.options -%}
-              {{ option | downcase | json }}: {{ variant.options[forloop.index0] | json }},
-            {%- endfor -%}
-            "offers": {
-              "@type" : "Offer",
-              "url" : {{ request.origin | append: variant.url | json }},
-              "availability" : "http://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}",
-              "price" : {{ variant.price | divided_by: 100.00 | json }},
-              "priceCurrency" : {{ cart.currency.iso_code | json }},
-              "seller": {
-                "@type": "Organization",
-                "name": {{ shop.name | json }}
-              },
-              "shippingDetails": {{ request.origin | append: '/pages/shipping-policy' | json }},
-              "hasMerchantReturnPolicy": {{ request.origin | append: '/pages/return-policy' | json }}
-            }
-          }{% unless forloop.last %},{% endunless %}
-        {%- endfor -%}
-      ]{% if product.metafields.stamped.reviews_count and product.metafields.stamped.reviews_count != '0' %},
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "{{ product.metafields.stamped.reviews_average }}",
-        "reviewCount": "{{ product.metafields.stamped.reviews_count }}"
-      }{% endif %}
-    }
-  </script>
-{%- else -%}
-  <script type="application/ld+json">
-    {
-      "@context": "http://schema.org",
-      "@type": "WebSite",
-      "url": "{{ shop.url }}",
-      "sameAs": [
-        "https://www.twitter.com/xyz",
-        "https://www.facebook.com/xyz",
-        "https://instagram.com/xyz"
-      ],
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "{{ shop.url }}/search?q={search_term_string}",
-        "query-input": "required name=search_term_string"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "{{ shop.name }}",
-        "logo": "https:{{ 'apple-touch-icon.png' | asset_url | remove: 'http' | remove: 'https:' }}",
-        "description": "{{ shop.description | escape }}",
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "contactType": "Customer Service",
-          "url": "{{ shop.url }}/pages/contact",
-          "email": "{{ shop.email }}"
+    </script>
+  {%- when 'article' -%}
+    <script type="application/ld+json">
+      {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "datePublished": "{{ article.published_at | date }}",
+        "dateModified": "{{ article.updated_at | date }}",
+        "articleSection": "{{ blog.title }}",
+        "backstory": "{{ blog.metafields.global.description_tag }}",
+        "headline": "{{ article.title | escape }}",
+        "description": "{{ article.excerpt | strip_html | escape }}",
+        "image": "https:{{ article.img.src | img_url | remove: 'http' | remove: 'https:' }}",
+        "wordCount": "{{ article.content | strip_html | strip_newlines | downcase | remove: 'and' | remove: 'the' | split: ' ' | size }}",
+        "author": {
+          "@type": "Person",
+          "name": "{{ article.author }}"
         },
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": "{{ shop.address.street }}",
-          "addressLocality": "{{ shop.address.city }}",
-          "addressRegion": "{{ shop.address.province_code }}",
-          "postalCode": "{{ shop.address.zip }}"
-        },
-        "department": [
-          {
-            "@type": "ClothingStore",
-            "name": "Our Physical Retail Store",
-            "image": "",
-            "address": {
-              "@type": "PostalAddress",
-              "streetAddress": ""
-              "addressLocality": "",
-              "addressRegion": "",
-              "postalCode": ""
-            },
-            "telephone": "",
-            "priceRange": "$$$"
+        "publisher": {
+          "@type": "Organization",
+          "name": "{{ shop.name }}",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https:{{ 'apple-touch-icon.png' | asset_url | remove: 'http' | remove: 'https:' }}"
           }
-        ]
+        },
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": "{{ shop.url }}/blogs/{{ blog.handle }}/{{ article.handle }}"
+        }
       }
-    }
-  </script>
-{%- endif -%}
+    </script>
+  {%- when 'product' -%}
+    <script type="application/ld+json">
+      {
+        "@context": "http://schema.org",
+        "@type": "ProductGroup",
+        "productGroupID": "{{ product.id }}",
+        "name": {{ product.title | json }},
+        "url": {{ request.origin | append: product.url | json }},
+        {% if product.selected_or_first_available_variant.sku != blank -%}
+          "sku": {{ product.selected_or_first_available_variant.sku | json }},
+        {%- endif %}
+        "description": {{ page_description | strip_html | json }},
+        {% if seo_media -%}
+          "image": [
+            {{ seo_media | image_url: width: 1920 | prepend: "https:" | json }}
+          ],
+        {%- endif %}
+        "brand": {
+          "@type": "Brand",
+          "name": {{ product.vendor | json }}
+        },
+        "variesBy": [
+          {%- for option in product.options -%}
+          "https:\/\/schema.org\/{{ option | downcase }}"{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        ],
+        "hasVariant": [
+          {%- for variant in product.variants -%}
+            {
+              "@type": "Product",
+              "image": [
+                {{ product.featured_image | image_url: width: 1920 | prepend: "https:" | json }}
+              ],
+              "description": {{ product.description | strip_html | json }},
+              {% if variant.sku != blank -%}
+                "sku": {{ variant.sku | json }},
+              {%- endif %}
+              "name": {{ product.title | append: '(' | append: variant.title | append: ')' | json }},
+              {%- for option in product.options -%}
+                {{ option | downcase | json }}: {{ variant.options[forloop.index0] | json }},
+              {%- endfor -%}
+              "offers": {
+                "@type" : "Offer",
+                "url" : {{ request.origin | append: variant.url | json }},
+                "availability" : "http://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}",
+                "price" : {{ variant.price | divided_by: 100.00 | json }},
+                "priceCurrency" : {{ cart.currency.iso_code | json }},
+                "seller": {
+                  "@type": "Organization",
+                  "name": {{ shop.name | json }}
+                },
+                "shippingDetails": {{ request.origin | append: '/pages/shipping-policy' | json }},
+                "hasMerchantReturnPolicy": {{ request.origin | append: '/pages/return-policy' | json }}
+              }
+            }{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        ]{% if product.metafields.stamped.reviews_count and product.metafields.stamped.reviews_count != '0' %},
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "{{ product.metafields.stamped.reviews_average }}",
+          "reviewCount": "{{ product.metafields.stamped.reviews_count }}"
+        }{% endif %}
+      }
+    </script>
+  {%- else -%}
+    <script type="application/ld+json">
+      {
+        "@context": "http://schema.org",
+        "@type": "WebSite",
+        "url": "{{ shop.url }}",
+        "sameAs": [
+          "https://www.twitter.com/xyz",
+          "https://www.facebook.com/xyz",
+          "https://instagram.com/xyz"
+        ],
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "{{ shop.url }}/search?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "{{ shop.name }}",
+          "logo": "https:{{ 'apple-touch-icon.png' | asset_url | remove: 'http' | remove: 'https:' }}",
+          "description": "{{ shop.description | escape }}",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "Customer Service",
+            "url": "{{ shop.url }}/pages/contact",
+            "email": "{{ shop.email }}"
+          },
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "{{ shop.address.street }}",
+            "addressLocality": "{{ shop.address.city }}",
+            "addressRegion": "{{ shop.address.province_code }}",
+            "postalCode": "{{ shop.address.zip }}"
+          },
+          "department": [
+            {
+              "@type": "ClothingStore",
+              "name": "Our Physical Retail Store",
+              "image": "",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": ""
+                "addressLocality": "",
+                "addressRegion": "",
+                "postalCode": ""
+              },
+              "telephone": "",
+              "priceRange": "$$$"
+            }
+          ]
+        }
+      }
+    </script>
+{%- endcase -%}
