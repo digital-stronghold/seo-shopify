@@ -1,0 +1,31 @@
+{%- comment -%}
+  NOTE: Usage
+    {%- layout none -%}
+    {%- include 'redirect' with '/pages/coming-soon' -%}
+{%- endcomment -%}
+{%- if redirect contains 'http' -%}
+    {%- assign url = redirect -%}
+  {%- else -%}
+    {%- assign url = shop.url | append: redirect -%}
+  {%- endif -%}
+  {%- comment -%}
+    Uncommendt for debug:
+    <script>
+      console.log('redirect: {{ redirect }}');
+      console.log('url: {{ url }}');
+    </script>
+  {%- endcomment -%}
+  <!DOCTYPE HTML>
+  <html lang="en-US">
+  <head>
+    {%- render 'head-meta' -%}
+    <meta http-equiv="refresh" content="0;url={{ url }}">
+    <script type="text/javascript">
+      window.top.location.href = "{{ url }}"
+    </script>
+  </head>
+  <body>
+    <h1>{{ page_title }}</h1>
+    <p>If you are not redirected automatically, follow the <a href='{{ url }}'>link</a>.</p>
+  </body>
+  </html>
